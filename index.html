@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Multi Angels Pro - Visualizador de múltiplas lives da Twitch">
+<meta name="theme-color" content="#9146FF">
+<title>Multi Angels Pro</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👼</text></svg>">
+<link rel="manifest" href="/manifest.json">
+<style>
+:root{--p:#9146FF;--pd:#772CE8;--pl:#A970FF;--bg:#0E0E10;--bg2:#18181B;--bg3:#1F1F23;--tx:#EFEFF1;--tx2:#ADADB8;--br:#2D2D35;--ok:#00F593;--er:#F1547B;--info:#00A8FC;--live:#FF4040}
+[data-theme=light]{--bg:#F7F7F8;--bg2:#fff;--bg3:#EFEFF1;--tx:#0E0E10;--tx2:#53535F;--br:#E5E5EA}
+[data-theme=purple]{--bg:#1A0E2E;--bg2:#2D1B4E;--bg3:#3F2768}
+[data-theme=matrix]{--p:#00FF41;--bg:#0D0208;--bg2:#111;--bg3:#1a1a1a;--tx:#00FF41;--tx2:#00cc33;--br:#003311}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+header{background:var(--bg2);border-bottom:1px solid var(--br);padding:.75rem 1rem;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:1.05rem;background:linear-gradient(135deg,var(--p),var(--pl));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-icon{font-size:1.3rem}
+.badge{background:var(--p);color:#fff;font-size:.65rem;padding:.15rem .4rem;border-radius:6px;font-weight:700;-webkit-text-fill-color:#fff}
+.nav-right{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+select{padding:.4rem .5rem;background:var(--bg3);border:1px solid var(--br);border-radius:6px;color:var(--tx);font-size:.82rem;cursor:pointer}
+.btn{padding:.5rem .9rem;border:none;border-radius:7px;font-size:.83rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;white-space:nowrap;transition:all .15s}
+.btn:active{transform:scale(.96)}
+.bp{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff}
+.bs{background:var(--bg3);color:var(--tx);border:1px solid var(--br)}
+.bs:hover{border-color:var(--p)}
+.bok{background:var(--ok);color:#000}
+.ber{background:var(--er);color:#fff}
+.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--br);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:.7rem 1.2rem;background:none;border:none;border-bottom:2px solid transparent;color:var(--tx2);cursor:pointer;font-size:.88rem;font-weight:600;white-space:nowrap;transition:all .2s}
+.tab:hover{color:var(--tx)}
+.tab.on{color:var(--p);border-bottom-color:var(--p)}
+.panel{display:none}.panel.on{display:block;animation:fu .2s ease}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.wrap{max-width:1600px;margin:0 auto;padding:1rem}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
+.stat{background:var(--bg2);border:1px solid var(--br);border-radius:10px;padding:.65rem;text-align:center}
+.stat-n{font-size:1.5rem;font-weight:700;color:var(--p)}
+.stat-l{font-size:.73rem;color:var(--tx2)}
+.ibox{background:var(--bg2);border:1px solid var(--br);border-radius:12px;padding:1rem;margin-bottom:.75rem}
+.irow{display:flex;gap:.4rem;flex-wrap:wrap}
+.irow input{flex:1;min-width:160px;padding:.65rem .9rem;background:var(--bg3);border:1px solid var(--br);border-radius:7px;color:var(--tx);font-size:.92rem}
+.irow input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(145,70,255,.12)}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem;min-height:1.8rem}
+.chip{display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .65rem;background:var(--bg3);border:1px solid var(--br);border-radius:20px;font-size:.82rem;animation:pop .18s ease}
+.chip.live{background:var(--live);color:#fff;border:none}
+.chip.live::before{content:'🔴';font-size:.68rem}
+.chip.fav{background:linear-gradient(135deg,var(--pd),var(--p));color:#fff;border:none}
+.cbtn{background:none;border:none;cursor:pointer;font-size:.9rem;line-height:1;padding:0;opacity:.75}
+.cbtn:hover{opacity:1}
+.cviews{font-size:.7rem;opacity:.8}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.ctrls{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--br)}
+.clabel{color:var(--tx2);font-size:.82rem;font-weight:600}
+.lbtns{display:flex;gap:.3rem;flex-wrap:wrap}
+.lbtn{padding:.35rem .7rem;background:var(--bg3);border:1px solid var(--br);border-radius:6px;color:var(--tx);cursor:pointer;font-size:.82rem;transition:all .15s}
+.lbtn:hover{border-color:var(--p)}
+.lbtn.on{background:var(--p);border-color:var(--p);color:#fff}
+.toggle-label{display:flex;align-items:center;gap:.35rem;cursor:pointer;font-size:.82rem;color:var(--tx2);font-weight:600}
+.pgrid{display:grid;gap:.6rem}
+.l1{grid-template-columns:1fr}
+.l2{grid-template-columns:repeat(2,1fr)}
+.l3{grid-template-columns:repeat(2,1fr)}
+.l3 .pw:first-child{grid-column:1/-1}
+.l4{grid-template-columns:repeat(2,1fr)}
+.l6{grid-template-columns:repeat(3,1fr)}
+.l9{grid-template-columns:repeat(3,1fr)}
+.with-chat{display:grid;gap:.6rem;grid-template-columns:1fr}
+@media(min-width:1024px){.with-chat{grid-template-columns:1fr 320px}}
+.parea{display:grid;gap:.6rem}
+.pa1{grid-template-columns:1fr}
+.pa2{grid-template-columns:repeat(2,1fr)}
+.pa4{grid-template-columns:repeat(2,1fr)}
+.pw{background:var(--bg2);border:1px solid var(--br);border-radius:10px;overflow:hidden;position:relative;aspect-ratio:16/9}
+.pw iframe{width:100%;height:100%;border:none;display:block}
+.pw-info{position:absolute;top:0;left:0;right:0;background:linear-gradient(to bottom,rgba(0,0,0,.8),transparent);padding:.5rem .65rem;display:flex;justify-content:space-between;align-items:flex-start;opacity:0;transition:opacity .2s;pointer-events:none}
+.pw:hover .pw-info{opacity:1}
+.pw-title{font-size:.78rem;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%}
+.pw-views{font-size:.75rem;color:#fff;background:rgba(0,0,0,.5);padding:.18rem .45rem;border-radius:9px;white-space:nowrap}
+.chatbox{background:var(--bg2);border:1px solid var(--br);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;min-height:380px}
+.chat-head{background:var(--bg3);padding:.55rem .9rem;border-bottom:1px solid var(--br);font-size:.87rem;font-weight:600}
+.chatbox iframe{flex:1;border:none;width:100%;min-height:380px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem;margin-top:.75rem}
+.mcard{background:var(--bg2);border:1px solid var(--br);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s}
+.mcard:hover{border-color:var(--p);transform:translateY(-3px);box-shadow:0 6px 20px rgba(145,70,255,.18)}
+.mthumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg3);display:block}
+.minfo{padding:.65rem}
+.mtitle{font-weight:600;font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:.3rem}
+.mmeta{display:flex;justify-content:space-between;color:var(--tx2);font-size:.75rem}
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.6rem;margin-top:.6rem}
+.gcard{background:var(--bg3);border:1px solid var(--br);border-radius:10px;padding:1rem;cursor:pointer;transition:all .18s}
+.gcard:hover{border-color:var(--p);transform:translateY(-2px)}
+.gcard h4{font-size:.9rem;margin-bottom:.25rem}
+.gcard p{font-size:.77rem;color:var(--tx2)}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;text-align:center;gap:.5rem;color:var(--tx2)}
+.empty-icon{font-size:2.5rem;opacity:.35}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:500;align-items:center;justify-content:center;padding:.75rem}
+.modal.on{display:flex}
+.mbox{background:var(--bg2);border:1px solid var(--br);border-radius:14px;padding:1.25rem;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+.mbox.wide{max-width:880px}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.mclose{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--tx2);line-height:1}
+.murl{width:100%;padding:.65rem;background:var(--bg3);border:1px solid var(--br);border-radius:7px;color:var(--tx);font-size:.82rem;margin:.65rem 0}
+.toasts{position:fixed;top:.75rem;right:.75rem;z-index:1000;display:flex;flex-direction:column;gap:.35rem;max-width:300px}
+.toast{background:var(--bg2);border:1px solid;border-radius:8px;padding:.6rem .9rem;font-size:.84rem;animation:si .25s ease;word-break:break-word}
+.tok{border-color:var(--ok)}.ter{border-color:var(--er)}.tinfo{border-color:var(--info)}
+@keyframes si{from{transform:translateX(320px);opacity:0}to{transform:translateX(0);opacity:1}}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:2000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:.75rem}
+.overlay.on{display:flex}
+.spin{width:44px;height:44px;border:3px solid var(--br);border-top-color:var(--p);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+footer{text-align:center;padding:1.5rem 1rem;color:var(--tx2);font-size:.8rem;border-top:1px solid var(--br);margin-top:1.5rem}
+footer a{color:var(--p);text-decoration:none}
+@media(max-width:768px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .l2,.l3,.l4,.l6,.l9{grid-template-columns:1fr}
+  .l3 .pw:first-child{grid-column:1}
+  .pa2,.pa4{grid-template-columns:1fr}
+  .mgrid{grid-template-columns:1fr}
+  .toasts{right:.4rem;left:.4rem;max-width:none}
+}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay"><div class="spin"></div><p>Carregando...</p></div>
+<div class="toasts" id="toasts"></div>
+<header>
+<div class="logo"><span class="logo-icon">👼</span>Multi Angels Pro<span class="badge">v2.2</span></div>
+<div class="nav-right">
+<select id="themeSelect" aria-label="Tema">
+<option value="dark">🌙 Escuro</option>
+<option value="light">☀️ Claro</option>
+<option value="purple">💜 Roxo</option>
+<option value="matrix">🟢 Matrix</option>
+</select>
+<button class="btn bs" id="shareBtn">🔗</button>
+<button class="btn bok" id="notifBtn">🔔</button>
+</div>
+</header>
+<div class="tabs">
+<button class="tab on" data-tab="lives">🎬 Lives</button>
+<button class="tab" data-tab="vods">📹 VODs</button>
+<button class="tab" data-tab="clips">🎬 Clips</button>
+<button class="tab" data-tab="groups">📁 Grupos</button>
+</div>
+<div class="wrap">
+<div class="stats">
+<div class="stat"><div class="stat-n" id="sC">0</div><div class="stat-l">Canais</div></div>
+<div class="stat"><div class="stat-n" id="sF">0</div><div class="stat-l">Favoritos</div></div>
+<div class="stat"><div class="stat-n" id="sL">0</div><div class="stat-l">Ao Vivo</div></div>
+<div class="stat"><div class="stat-n" id="sV">0</div><div class="stat-l">Viewers</div></div>
+</div>
+<div class="panel on" id="p-lives">
+<div class="ibox">
+<div class="irow">
+<input id="inp" type="text" placeholder="Nome do canal" autocomplete="off">
+<button class="btn bp" id="addBtn">➕</button>
+<button class="btn bs" id="impBtn">📥</button>
+<button class="btn ber" id="clrBtn">🗑️</button>
+</div>
+<div class="chips" id="chips"></div>
+<div class="ctrls">
+<span class="clabel">Layout:</span>
+<div class="lbtns" id="lbtns">
+<button class="lbtn on" data-l="1">1</button>
+<button class="lbtn" data-l="2">2</button>
+<button class="lbtn" data-l="3">3</button>
+<button class="lbtn" data-l="4">4</button>
+<button class="lbtn" data-l="6">6</button>
+<button class="lbtn" data-l="9">9</button>
+</div>
+<label class="toggle-label"><input type="checkbox" id="chatTog"> 💬 Chat</label>
+<div id="chatWrap" style="display:none">
+<select id="chatSel" aria-label="Canal"><option value="">Canal...</option></select>
+</div>
+</div>
+</div>
+<div id="pArea"></div>
+</div>
+<div class="panel" id="p-vods">
+<div class="ibox">
+<div class="irow">
+<input id="vodInp" type="text" placeholder="Canal para VODs" autocomplete="off">
+<button class="btn bp" id="vodBtn">🔍</button>
+</div>
+</div>
+<div id="vodGrid"></div>
+</div>
+<div class="panel" id="p-clips">
+<div class="ibox">
+<div class="irow">
+<input id="clipInp" type="text" placeholder="Canal para Clips" autocomplete="off">
+<button class="btn bp" id="clipBtn">🔍</button>
+</div>
+</div>
+<div id="clipGrid"></div>
+</div>
+<div class="panel" id="p-groups">
+<div class="ibox">
+<button class="btn bp" id="newGrpBtn">📁 Novo Grupo</button>
+</div>
+<div class="ibox">
+<h3 style="margin-bottom:.5rem;font-size:.95rem">📁 Grupos</h3>
+<div class="ggrid" id="grpGrid"></div>
+</div>
+</div>
+</div>
+<footer><p>Multi Angels Pro v2.2 &copy; 2026 — Feito com 💜 para <a href="https://twitch.tv" target="_blank" rel="noopener">Twitch</a></p></footer>
+<div class="modal" id="shareMod">
+<div class="mbox">
+<div class="mhead"><h3>🔗 Compartilhar</h3><button class="mclose" onclick="close('shareMod')">✕</button></div>
+<p style="font-size:.85rem;color:var(--tx2)">Copie o link:</p>
+<input class="murl" id="shareUrl" readonly>
+<button class="btn bp" style="width:100%" onclick="copyShare()">📋 Copiar</button>
+</div>
+</div>
+<div class="modal" id="grpMod">
+<div class="mbox">
+<div class="mhead"><h3>📁 Criar Grupo</h3><button class="mclose" onclick="close('grpMod')">✕</button></div>
+<input id="grpName" type="text" placeholder="Nome do grupo" style="width:100%;padding:.65rem;background:var(--bg3);border:1px solid var(--br);border-radius:7px;color:var(--tx);font-size:.9rem;margin-bottom:.75rem">
+<p style="font-size:.83rem;color:var(--tx2);margin-bottom:.4rem">Canais:</p>
+<div id="grpChs"></div>
+<button class="btn bp" style="width:100%;margin-top:.75rem" onclick="saveGrp()">💾</button>
+</div>
+</div>
+<div class="modal" id="mediaMod">
+<div class="mbox wide">
+<div class="mhead"><h3 id="medTit">▶️</h3><button class="mclose" onclick="close('mediaMod')">✕</button></div>
+<div id="medPlay"></div>
+</div>
+</div>
+<script>
+let TID='',TOK='';const API='https://api.twitch.tv/helix';
+let chs=[],lay=1,thm='dark',favs=[],grps={},showC=false,chatC='',tab='lives';
+let liveM=new Map(),dataM=new Map(),tmr=null;
+const SK={s:'ma_s',l:'ma_l',t:'ma_t',f:'ma_f',g:'ma_g',c:'ma_c'};
+
+async function init(){
+  load();parseURL();bindAll();applyTheme();loading(true);
+  await getTok();
+  if(chs.length)await refresh();
+  loading(false);renderAll();updateStats();startTimer();
+}
+
+async function getTok(){
+  for(const ep of['/.netlify/functions/twitch-token','/api/twitch-token']){
+    try{
+      const r=await fetch(ep);
+      if(r.ok){
+        const d=await r.json();
+        if(d.access_token){TOK=d.access_token;TID=d.client_id;return}
+      }
+    }catch{}
+  }
+  toast('Modo offline','tinfo');
+}
+
+async function api(ep){
+  if(!TOK)return null;
+  try{
+    const r=await fetch(API+ep,{headers:{'Client-ID':TID,'Authorization':'Bearer '+TOK}});
+    if(r.status===401){await getTok();return api(ep)}
+    return r.ok?r.json():null;
+  }catch{return null}
+}
+
+async function refresh(){
+  for(const ch of chs){
+    const d=await api('/streams?user_login='+ch);
+    const info=d?.data?.[0];
+    if(info){
+      const was=liveM.has(ch);
+      liveM.set(ch,info);dataM.set(ch,info);
+      if(!was&&favs.includes(ch)&&Notification.permission==='granted')
+        new Notification(ch+' está AO VIVO! 🔴',{body:info.title});
+    }else{liveM.delete(ch);dataM.delete(ch)}
+  }
+  updateStats();renderChips();renderPlayers();
+}
+
+function startTimer(){
+  clearInterval(tmr);
+  tmr=setInterval(()=>{if(chs.length&&tab==='lives')refresh()},60000);
+}
+
+function save(){
+  try{
+    localStorage.setItem(SK.s,JSON.stringify(chs));
+    localStorage.setItem(SK.l,lay);
+    localStorage.setItem(SK.t,thm);
+    localStorage.setItem(SK.f,JSON.stringify(favs));
+    localStorage.setItem(SK.g,JSON.stringify(grps));
+    localStorage.setItem(SK.c,JSON.stringify({showC,chatC}));
+  }catch{}
+}
+
+function load(){
+  try{
+    chs=JSON.parse(localStorage.getItem(SK.s)||'[]');
+    lay=parseInt(localStorage.getItem(SK.l))||1;
+    thm=localStorage.getItem(SK.t)||'dark';
+    favs=JSON.parse(localStorage.getItem(SK.f)||'[]');
+    grps=JSON.parse(localStorage.getItem(SK.g)||'{}');
+    const c=JSON.parse(localStorage.getItem(SK.c)||'{}');
+    showC=c.showC||false;chatC=c.chatC||'';
+  }catch{}
+  document.getElementById('chatTog').checked=showC;
+  document.getElementById('chatWrap').style.display=showC?'block':'none';
+  document.getElementById('themeSelect').value=thm;
+  document.querySelectorAll('.lbtn').forEach(b=>b.classList.toggle('on',+b.dataset.l===lay));
+}
+
+function parseURL(){
+  const p=new URLSearchParams(location.search);
+  if(p.get('streams')){
+    const us=p.get('streams').split(',').filter(Boolean);
+    chs=[...new Set([...chs,...us])];
+  }
+  if(p.get('layout'))lay=parseInt(p.get('layout'))||lay;
+}
+
+function bindAll(){
+  document.getElementById('addBtn').onclick=add;
+  document.getElementById('inp').onkeypress=e=>e.key==='Enter'&&add();
+  document.getElementById('clrBtn').onclick=()=>confirm('Remover tudo?')&&clr();
+  document.getElementById('impBtn').onclick=imp;
+  document.getElementById('shareBtn').onclick=openShare;
+  document.getElementById('notifBtn').onclick=togNotif;
+  document.getElementById('themeSelect').onchange=e=>{thm=e.target.value;save();applyTheme()};
+  document.getElementById('lbtns').onclick=e=>{
+    const b=e.target.closest('.lbtn');if(!b)return;
+    lay=+b.dataset.l;
+    document.querySelectorAll('.lbtn').forEach(x=>x.classList.toggle('on',x===b));
+    save();renderPlayers();
+  };
+  document.getElementById('chatTog').onchange=e=>{
+    showC=e.target.checked;
+    document.getElementById('chatWrap').style.display=showC?'block':'none';
+    save();renderPlayers();
+  };
+  document.getElementById('chatSel').onchange=e=>{chatC=e.target.value;save();renderPlayers()};
+  document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>swTab(t.dataset.tab));
+  document.getElementById('vodBtn').onclick=loadVODs;
+  document.getElementById('vodInp').onkeypress=e=>e.key==='Enter'&&loadVODs();
+  document.getElementById('clipBtn').onclick=loadClips;
+  document.getElementById('clipInp').onkeypress=e=>e.key==='Enter'&&loadClips();
+  document.getElementById('newGrpBtn').onclick=openGrp;
+  document.querySelectorAll('.modal').forEach(m=>m.onclick=e=>{if(e.target===m)close(m.id)});
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('inp').focus()}
+    if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();openShare()}
+  });
+}
+
+function swTab(t){
+  tab=t;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));
+  if(t==='groups')renderGrps();
+}
+
+async function add(){
+  const inp=document.getElementById('inp');
+  const ch=inp.value.trim().toLowerCase()
+    .replace(/^(https?:\/\/)?(www\.)?twitch\.tv\//,'')
+    .replace(/[^a-z0-9_]/g,'');
+  if(!ch)return toast('Canal inválido','ter');
+  if(chs.includes(ch))return toast('Já adicionado','ter');
+  chs.push(ch);inp.value='';
+  save();loading(true);await refresh();loading(false);renderAll();
+  toast(ch+' adicionado!','tok');
+}
+
+function rem(ch){
+  chs=chs.filter(s=>s!==ch);
+  liveM.delete(ch);dataM.delete(ch);
+  save();renderAll();updateStats();
+}
+
+function togFav(ch){
+  favs=favs.includes(ch)?favs.filter(f=>f!==ch):[...favs,ch];
+  save();renderChips();updateStats();
+}
+
+function clr(){
+  chs=[];liveM.clear();dataM.clear();
+  save();renderAll();updateStats();
+}
+
+function renderAll(){renderChips();renderPlayers()}
+
+function renderChips(){
+  const c=document.getElementById('chips');
+  if(!chs.length){c.innerHTML='<span style="color:var(--tx2);font-size:.82rem">Nenhum canal</span>';return}
+  c.innerHTML=chs.map(ch=>{
+    const live=liveM.has(ch),fav=favs.includes(ch);
+    const info=dataM.get(ch);
+    const cls=live?'chip live':fav?'chip fav':'chip';
+    const v=info?`<span class="cviews">${fmt(info.viewer_count)} 👁️</span>`:'';
+    return`<div class="${cls}"><span>${ch}</span>${v}
+      <button class="cbtn" onclick="togFav('${ch}')">${fav?'⭐':'☆'}</button>
+      <button class="cbtn" onclick="rem('${ch}')">×</button>
+    </div>`;
+  }).join('');
+  const sel=document.getElementById('chatSel');
+  sel.innerHTML='<option value="">Canal...</option>'+
+    chs.map(s=>`<option value="${s}"${s===chatC?' selected':''}>${s}</option>`).join('');
+}
+
+function renderPlayers(){
+  const area=document.getElementById('pArea');
+  if(!chs.length){
+    area.innerHTML=`<div class="empty"><div class="empty-icon">🎮</div><h3>Nenhuma live</h3><p style="font-size:.85rem">Adicione canais</p></div>`;
+    return;
+  }
+  const list=chs.slice(0,lay);
+  if(showC&&chatC){
+    const pa=lay<=2?lay:lay<=4?2:2;
+    area.innerHTML=`<div class="with-chat">
+      <div class="parea pa${pa}">${list.map(pw).join('')}</div>
+      <div class="chatbox">
+        <div class="chat-head">💬 ${chatC}</div>
+        <iframe src="https://www.twitch.tv/embed/${chatC}/chat?parent=${location.hostname}&darkpopout" title="Chat"></iframe>
+      </div>
+    </div>`;
+  }else{
+    area.innerHTML=`<div class="pgrid l${lay}">${list.map(pw).join('')}</div>`;
+  }
+}
+
+function pw(ch){
+  const info=dataM.get(ch);
+  const bar=info?`<div class="pw-info"><div class="pw-title">${esc(info.title)}</div><div class="pw-views">👁️ ${fmt(info.viewer_count)}</div></div>`:'';
+  return`<div class="pw">${bar}
+    <iframe src="https://player.twitch.tv/?channel=${ch}&parent=${location.hostname}" allowfullscreen loading="lazy" title="${ch}"></iframe>
+  </div>`;
+}
+
+async function loadVODs(){
+  const ch=document.getElementById('vodInp').value.trim().toLowerCase();
+  if(!ch)return toast('Digite um canal','ter');
+  loading(true);
+  const u=await api('/users?login='+ch);
+  const uid=u?.data?.[0]?.id;
+  if(!uid){loading(false);return toast('Canal não encontrado','ter')}
+  const d=await api(`/videos?user_id=${uid}&first=20&type=archive`);
+  loading(false);
+  const vods=d?.data||[];
+  const g=document.getElementById('vodGrid');
+  if(!vods.length){g.innerHTML=empty('📹','Nenhum VOD');return}
+  g.innerHTML=`<div class="mgrid">${vods.map(v=>`
+    <div class="mcard" onclick="playMed('${v.id}','vod','${esc(v.title)}')">
+      <img class="mthumb" src="${v.thumbnail_url.replace('%{width}','320').replace('%{height}','180')}" loading="lazy">
+      <div class="minfo"><div class="mtitle">${esc(v.title)}</div>
+      <div class="mmeta"><span>👁️ ${fmt(v.view_count)}</span><span>⏱️ ${dur(v.duration)}</span></div></div>
+    </div>`).join('')}</div>`;
+  toast(`${vods.length} VODs`,'tok');
+}
+
+async function loadClips(){
+  const ch=document.getElementById('clipInp').value.trim().toLowerCase();
+  if(!ch)return toast('Digite um canal','ter');
+  loading(true);
+  const u=await api('/users?login='+ch);
+  const uid=u?.data?.[0]?.id;
+  if(!uid){loading(false);return toast('Canal não encontrado','ter')}
+  const d=await api(`/clips?broadcaster_id=${uid}&first=20`);
+  loading(false);
+  const clips=d?.data||[];
+  const g=document.getElementById('clipGrid');
+  if(!clips.length){g.innerHTML=empty('🎬','Nenhum clip');return}
+  g.innerHTML=`<div class="mgrid">${clips.map(c=>`
+    <div class="mcard" onclick="playMed('${c.id}','clip','${esc(c.title)}')">
+      <img class="mthumb" src="${c.thumbnail_url}" loading="lazy">
+      <div class="minfo"><div class="mtitle">${esc(c.title)}</div>
+      <div class="mmeta"><span>👁️ ${fmt(c.view_count)}</span><span>⏱️ ${c.duration}s</span></div></div>
+    </div>`).join('')}</div>`;
+  toast(`${clips.length} clips`,'tok');
+}
+
+function playMed(id,type,title){
+  document.getElementById('medTit').textContent=title;
+  const src=type==='vod'
+    ?`https://player.twitch.tv/?video=${id}&parent=${location.hostname}&autoplay=true`
+    :`https://clips.twitch.tv/embed?clip=${id}&parent=${location.hostname}&autoplay=true`;
+  document.getElementById('medPlay').innerHTML=
+    `<iframe src="${src}" width="100%" height="430" allowfullscreen style="border:none;border-radius:8px;display:block"></iframe>`;
+  open('mediaMod');
+}
+
+function renderGrps(){
+  const g=document.getElementById('grpGrid');
+  const keys=Object.keys(grps);
+  if(!keys.length){g.innerHTML='<p style="color:var(--tx2);font-size:.85rem">Nenhum grupo</p>';return}
+  g.innerHTML=keys.map(k=>`
+    <div class="gcard" onclick="loadGrp('${k}')">
+      <h4>📁 ${k}</h4><p>${grps[k].length} canais</p>
+      <button class="btn ber" style="padding:.3rem .6rem;font-size:.75rem;margin-top:.4rem"
+        onclick="event.stopPropagation();delGrp('${k}')">🗑️</button>
+    </div>`).join('');
+}
+
+function openGrp(){
+  if(!chs.length)return toast('Adicione canais','ter');
+  document.getElementById('grpName').value='';
+  document.getElementById('grpChs').innerHTML=chs.map(s=>
+    `<label style="display:block;margin:.25rem 0;font-size:.85rem"><input type="checkbox" value="${s}"> ${s}</label>`).join('');
+  open('grpMod');
+}
+
+function saveGrp(){
+  const name=document.getElementById('grpName').value.trim();
+  if(!name)return toast('Digite um nome','ter');
+  const cs=[...document.querySelectorAll('#grpChs input:checked')].map(i=>i.value);
+  if(!cs.length)return toast('Selecione canais','ter');
+  grps[name]=cs;save();close('grpMod');renderGrps();
+  toast(`Grupo "${name}" criado!','tok');
+}
+
+async function loadGrp(name){
+  chs=[...grps[name]];save();
+  loading(true);await refresh();loading(false);
+  renderAll();swTab('lives');
+  toast(`"${name}" carregado!','tok');
+}
+
+function delGrp(name){
+  if(!confirm(`Deletar "${name}"?`))return;
+  delete grps[name];save();renderGrps();
+}
+
+function openShare(){
+  const p=new URLSearchParams();
+  if(chs.length)p.set('streams',chs.join(','));
+  p.set('layout',lay);
+  document.getElementById('shareUrl').value=location.origin+location.pathname+'?'+p;
+  open('shareMod');
+}
+
+function copyShare(){
+  const i=document.getElementById('shareUrl');i.select();document.execCommand('copy');
+  toast('Link copiado! 📋','tok');
+}
+
+function imp(){
+  const url=prompt('Cole a URL:');if(!url)return;
+  try{
+    const cs=new URLSearchParams(new URL(url).search).get('streams')?.split(',').filter(Boolean)||[];
+    if(!cs.length)return toast('Nenhum canal','ter');
+    chs=[...new Set([...chs,...cs])];
+    save();refresh().then(()=>{renderAll();toast(`${cs.length} importados!','tok')});
+  }catch{toast('URL inválida','ter')}
+}
+
+async function togNotif(){
+  if(!('Notification' in window))return toast('Não suportado','ter');
+  const p=await Notification.requestPermission();
+  if(p==='granted'){
+    document.getElementById('notifBtn').className='btn bp';
+    document.getElementById('notifBtn').textContent='🔔 ON';
+    toast('Notificações ativas!','tok');
+  }else toast('Permissão negada','ter');
+}
+
+function updateStats(){
+  document.getElementById('sC').textContent=chs.length;
+  document.getElementById('sF').textContent=favs.length;
+  document.getElementById('sL').textContent=liveM.size;
+  let v=0;dataM.forEach(d=>v+=d.viewer_count||0);
+  document.getElementById('sV').textContent=fmt(v);
+}
+
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',thm);
+  document.getElementById('themeSelect').value=thm;
+}
+
+function open(id){document.getElementById(id).classList.add('on')}
+function close(id){
+  document.getElementById(id).classList.remove('on');
+  if(id==='mediaMod')document.getElementById('medPlay').innerHTML='';
+}
+
+function toast(msg,cls='tok'){
+  const c=document.getElementById('toasts');
+  const t=document.createElement('div');
+  t.className='toast '+cls;t.textContent=msg;
+  c.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},3000);
+}
+
+function loading(on){document.getElementById('overlay').classList.toggle('on',on)}
+
+function fmt(n){
+  if(!n)return'0';
+  if(n>=1e6)return(n/1e6).toFixed(1)+'M';
+  if(n>=1e3)return(n/1e3).toFixed(1)+'K';
+  return String(n);
+}
+function dur(d){const m=d.match(/(\d+)h(\d+)m/);return m?m[1]+'h'+m[2]+'m':d}
+function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function empty(icon,msg){return`<div class="empty"><div class="empty-icon">${icon}</div><h3>${msg}</h3></div>`}
+
+init();
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+</script>
+</body>
+</html>

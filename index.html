@@ -1642,27 +1642,45 @@
             
             playVOD(vodId, title) {
                 document.getElementById('vodModalTitle').textContent = title;
-                document.getElementById('vodPlayer').innerHTML = `
-                    <iframe
-                        src="https://player.twitch.tv/?video=${vodId}&parent=${window.location.hostname}&autoplay=true"
-                        height="480"
-                        width="100%"
-                        allowfullscreen>
-                    </iframe>
-                `;
+                
+                const vodPlayer = document.getElementById('vodPlayer');
+                vodPlayer.textContent = '';
+                
+                const vodIframe = document.createElement('iframe');
+                const vodUrl = new URL('https://player.twitch.tv/');
+                vodUrl.searchParams.set('video', vodId);
+                vodUrl.searchParams.set('parent', window.location.hostname);
+                vodUrl.searchParams.set('autoplay', 'true');
+                
+                vodIframe.src = vodUrl.toString();
+                vodIframe.height = '480';
+                vodIframe.width = '100%';
+                vodIframe.setAttribute('allowfullscreen', '');
+                
+                vodPlayer.appendChild(vodIframe);
+                
                 document.getElementById('vodModal').classList.add('active');
             }
             
             playClip(clipId, title) {
                 document.getElementById('clipModalTitle').textContent = title;
-                document.getElementById('clipPlayer').innerHTML = `
-                    <iframe
-                        src="https://clips.twitch.tv/embed?clip=${clipId}&parent=${window.location.hostname}&autoplay=true"
-                        height="480"
-                        width="100%"
-                        allowfullscreen>
-                    </iframe>
-                `;
+                
+                const clipPlayer = document.getElementById('clipPlayer');
+                clipPlayer.textContent = '';
+                
+                const clipIframe = document.createElement('iframe');
+                const clipUrl = new URL('https://clips.twitch.tv/embed');
+                clipUrl.searchParams.set('clip', clipId);
+                clipUrl.searchParams.set('parent', window.location.hostname);
+                clipUrl.searchParams.set('autoplay', 'true');
+                
+                clipIframe.src = clipUrl.toString();
+                clipIframe.height = '480';
+                clipIframe.width = '100%';
+                clipIframe.setAttribute('allowfullscreen', '');
+                
+                clipPlayer.appendChild(clipIframe);
+                
                 document.getElementById('clipModal').classList.add('active');
             }
             

@@ -1616,7 +1616,7 @@
                 }
                 
                 grid.innerHTML = clips.map(clip => `
-                    <div class="clip-card" onclick="app.playClip('${clip.id}', '${clip.title.replace(/'/g, "\\'")}')">
+                    <div class="clip-card" data-clip-id="${clip.id}" data-clip-title="${clip.title}">
                         <img src="${clip.thumbnail_url}" alt="${clip.title}" class="clip-thumbnail" loading="lazy">
                         <div class="clip-info">
                             <div class="clip-title">${clip.title}</div>
@@ -1627,6 +1627,15 @@
                         </div>
                     </div>
                 `).join('');
+                
+                // Attach click handlers after rendering to avoid inline JS and escaping issues
+                Array.from(grid.getElementsByClassName('clip-card')).forEach(card => {
+                    card.addEventListener('click', () => {
+                        const clipId = card.getAttribute('data-clip-id');
+                        const clipTitle = card.getAttribute('data-clip-title') || '';
+                        this.playClip(clipId, clipTitle);
+                    });
+                });
                 
                 this.showToast(`${clips.length} clips carregados`, 'success');
             }

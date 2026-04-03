@@ -1579,7 +1579,7 @@
                 }
                 
                 grid.innerHTML = vods.map(vod => `
-                    <div class="vod-card" onclick="app.playVOD('${vod.id}', '${vod.title.replace(/'/g, "\\'")}')">
+                    <div class="vod-card" onclick="app.playVOD('${vod.id}', '${vod.title.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')">
                         <img src="${vod.thumbnail_url.replace('%{width}', '320').replace('%{height}', '180')}" 
                              alt="${vod.title}" class="vod-thumbnail" loading="lazy">
                         <div class="vod-info">
